@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KantoDex — The Original 151</title>
+<style>
+:root{--bg:#f5f7fb;--ink:#172033;--muted:#68738a;--line:#e5e9f2;--red:#e94747;--card:#fff;--shadow:0 12px 35px #18264b0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(120deg,#fff 10%,#fff4f3 100%);border-bottom:1px solid var(--line);padding:28px max(22px,calc((100vw - 1180px)/2)) 24px}
+.topline{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.04em;font-size:22px}.pokeball{width:27px;height:27px;border:3px solid var(--ink);border-radius:50%;background:linear-gradient(to bottom,#ef4b4b 0 45%,var(--ink) 45% 55%,white 55%);position:relative}.pokeball:after{content:"";position:absolute;width:7px;height:7px;background:white;border:2px solid var(--ink);border-radius:50%;left:7px;top:7px}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-top:25px}.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--red)}h1{font-size:clamp(34px,5vw,55px);letter-spacing:-.055em;line-height:1.02;margin:9px 0 12px}.hero p{color:var(--muted);max-width:600px;line-height:1.6;margin:0}.count{font-size:13px;color:var(--muted);background:#fff;border:1px solid var(--line);padding:11px 14px;border-radius:13px;white-space:nowrap}
+main{max-width:1180px;margin:auto;padding:24px 22px 55px}.toolbar{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}.search{flex:1;min-width:220px;position:relative}.search span{position:absolute;left:14px;top:12px;color:var(--muted)}input,select{width:100%;height:44px;border:1px solid #dfe4ee;background:white;border-radius:12px;padding:0 13px;color:var(--ink);font:inherit;outline:none}input{padding-left:40px}input:focus,select:focus{border-color:#e94747;box-shadow:0 0 0 3px #e9474718}.toolbar select{width:175px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.pokemon-card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:13px;text-align:left;cursor:pointer;transition:transform .16s,border-color .16s,box-shadow .16s;min-width:0;box-shadow:var(--shadow);color:inherit}.pokemon-card:hover{transform:translateY(-3px);border-color:#f1a1a1}.pokemon-card.active{border:2px solid var(--red);padding:12px;box-shadow:0 8px 28px #e9474717}.card-top{display:flex;justify-content:space-between;align-items:center;color:#929bb0;font-size:11px;font-weight:800}.pokemon-card img{width:100%;height:115px;object-fit:contain;display:block;margin:6px auto 4px;image-rendering:auto}.pokemon-card h3{font-size:15px;margin:0 0 8px;text-transform:capitalize;letter-spacing:-.02em}.types{display:flex;gap:5px;flex-wrap:wrap}.type{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:5px 8px;border-radius:7px;color:#354056;background:#eef1f6}.type.grass{background:#e0f5e7;color:#22784a}.type.poison{background:#f0e5fb;color:#7a42a5}.type.fire{background:#ffe6dc;color:#bd4b25}.type.water{background:#e0edff;color:#2c62b1}.type.bug{background:#eef5ce;color:#637c19}.type.normal{background:#edf0f4;color:#586174}.type.electric{background:#fff2bd;color:#967000}.type.ground{background:#f3e4ce;color:#8d5b22}.type.fairy{background:#ffe5f1;color:#ad4c7c}.type.fighting{background:#ffe2e2;color:#a52f36}.type.psychic{background:#ffe1ea;color:#b53e67}.type.rock{background:#eee7d3;color:#79683a}.type.ghost{background:#e8e4fa;color:#6650a1}.type.ice{background:#dcf8fa;color:#25818c}.type.dragon{background:#e8e2ff;color:#6246b4}.type.steel{background:#e5eaf0;color:#586579}.type.flying{background:#e8e8ff;color:#5d62ad}.detail{position:sticky;top:15px;background:white;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}.detail-hero{background:radial-gradient(circle at 50% 45%,#fff 0,#f3f6fc 70%);padding:18px 20px 10px;text-align:center}.detail-number{color:#99a2b5;font-size:12px;font-weight:800}.detail-hero img{width:190px;height:160px;object-fit:contain;display:block;margin:0 auto}.detail-content{padding:17px 20px 21px}.detail h2{text-transform:capitalize;font-size:26px;letter-spacing:-.04em;margin:0 0 10px}.detail p{color:#5f6b80;font-size:13px;line-height:1.65;margin:14px 0}.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:#8b95a9;font-weight:800;margin:19px 0 10px}.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fact{background:#f6f8fb;border-radius:10px;padding:10px}.fact span{display:block;color:#8b95a9;font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:800;margin-bottom:5px}.fact strong{font-size:13px;text-transform:capitalize}.evolution{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap}.evo-item{background:#f5f7fb;border:1px solid var(--line);border-radius:11px;padding:7px 5px;width:82px;text-align:center;cursor:pointer;color:inherit}.evo-item:hover{border-color:var(--red)}.evo-item img{width:56px;height:56px;object-fit:contain}.evo-item div{font-size:10px;text-transform:capitalize;font-weight:750}.arrow{color:#a1a9b8;font-weight:900}.empty{grid-column:1/-1;padding:55px 20px;text-align:center;background:white;border:1px dashed #d8deea;border-radius:16px;color:var(--muted)}.status{font-size:12px;color:var(--muted);margin:0 0 12px}.skeleton{height:190px;border-radius:16px;background:linear-gradient(90deg,#edf0f6,#f8f9fc,#edf0f6);background-size:200% 100%;animation:shine 1.4s infinite}@keyframes shine{to{background-position:-200% 0}}footer{text-align:center;padding:22px;color:#8993a7;font-size:11px;line-height:1.7}footer a{color:#65718a}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.detail{position:static;grid-row:1}.detail-hero{display:flex;align-items:center;justify-content:center;gap:18px;text-align:left;padding:10px 18px}.detail-hero img{width:115px;height:105px;margin:0}.detail-hero .detail-number{display:block}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{align-items:start;flex-direction:column;gap:14px}}
+@media(max-width:540px){header{padding:22px 17px}.hero{margin-top:20px}main{padding:17px 13px 40px}.toolbar select{flex:1;width:auto}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.pokemon-card{padding:10px}.pokemon-card img{height:95px}.pokemon-card h3{font-size:14px}.detail-hero img{width:95px;height:90px}.detail h2{font-size:22px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="topline"><span class="pokeball"></span> KantoDex</div>
+  <div class="hero">
+    <div><div class="eyebrow">Generation I · National Pokédex</div><h1>The original 151.</h1><p>Meet the Pokémon that started it all. Explore their types, learn what makes each one special, and follow their evolution families.</p></div>
+    <div class="count" id="count">Loading Pokédex…</div>
+  </div>
+</header>
+<main>
+  <div class="toolbar">
+    <div class="search"><span>⌕</span><input id="search" type="search" placeholder="Search by name or Pokédex number…" aria-label="Search Pokémon"></div>
+    <select id="typeFilter" aria-label="Filter by type"><option value="">All types</option></select>
+    <select id="sort" aria-label="Sort Pokémon"><option value="number">Pokédex order</option><option value="name">Name A–Z</option></select>
+  </div>
+  <div class="layout">
+    <section><p class="status" id="status">Gathering Pokémon data from PokéAPI…</p><div class="grid" id="grid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></section>
+    <aside class="detail" id="detail"><div class="detail-hero"><div><div class="detail-number">YOUR NEXT DISCOVERY</div><h2 style="text-transform:none">Choose a Pokémon</h2></div><img alt="" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"></div><div class="detail-content"><p>Select any card to see its description, type, height, weight, and evolution family.</p></div></aside>
+  </div>
+</main>
+<footer>Unofficial fan-made Pokédex for learning and exploration. Pokémon names and artwork belong to their respective rights holders.<br>Data and artwork provided by <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">PokéAPI</a>. This page loads data from the internet.</footer>
+<script>
+const API='https://pokeapi.co/api/v2/';
+const artwork=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+const $=id=>document.getElementById(id);
+let all=[], selected=1, evolutions={};
+const pretty=s=>s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+const typeClass=s=>s.toLowerCase();
+async function getJSON(url){const r=await fetch(url);if(!r.ok)throw new Error('Could not load PokéAPI data');return r.json()}
+async function pool(items,limit,fn){let i=0;const workers=Array.from({length:Math.min(limit,items.length)},async()=>{while(i<items.length){const n=i++;await fn(items[n],n)}});await Promise.all(workers)}
+function pickDescription(species){const entries=species.flavor_text_entries||[];const en=entries.find(x=>x.language.name==='en'&&['red','blue','yellow','firered','leafgreen'].includes(x.version.name))||entries.find(x=>x.language.name==='en');return (en?.flavor_text||`${pretty(species.name)} is one of the original Pokémon discovered in the Kanto region.`).replace(/[\n\f\r]/g,' ').replace(/\s+/g,' ')}
+async function load(){
+ try{
+  const list=await getJSON(API+'pokemon?limit=151&offset=0');
+  all=Array.from({length:151},(_,i)=>({id:i+1,name:list.results[i].name,types:[],height:0,weight:0,description:'',speciesUrl:API+`pokemon-species/${i+1}/`,chainId:null}));
+  let done=0;
+  await pool(all,10,async p=>{
+   try{
+    const d=await getJSON(API+`pokemon/${p.id}/`);
+    p.types=d.types.map(t=>t.type.name);p.height=d.height;p.weight=d.weight;
+    const s=await getJSON(p.speciesUrl);p.description=pickDescription(s);p.chainId=s.evolution_chain.url;
+   }catch(e){p.description=`${pretty(p.name)} is Pokémon #${p.id} in the original Kanto Pokédex.`}
+   done++;if(done%15===0){$('status').textContent=`Loading Pokémon details… ${done} of 151`}
+  });
+  const chainUrls=[...new Set(all.map(p=>p.chainId).filter(Boolean))];
+  await pool(chainUrls,8,async url=>{try{const data=await getJSON(url);const family=[];function walk(node){const id=Number(node.species.url.match(/pokemon-species\/(\d+)/)[1]);if(id<=151)family.push(id);node.evolves_to.forEach(walk)}walk(data.chain);family.sort((a,b)=>a-b);family.forEach(id=>evolutions[id]=family)}catch(e){}});
+  const types=[...new Set(all.flatMap(p=>p.types))].sort();types.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=pretty(t);$('typeFilter').append(o)});
+  $('count').textContent='151 Pokémon · 1 region';$('status').textContent='151 Pokémon ready to explore';render();showDetail(1);
+ }catch(e){$('status').textContent='Pokédex data could not load. Check your internet connection and refresh the page.';$('grid').innerHTML='<div class="empty">Could not connect to PokéAPI. Please check your connection and refresh.</div>'}
+}
+function render(){
+ const q=$('search').value.trim().toLowerCase(),type=$('typeFilter').value,sort=$('sort').value;
+ let list=all.filter(p=>(p.name.includes(q)||String(p.id)===q||String(p.id).padStart(3,'0')===q)&&(!type||p.types.includes(type)));
+ if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));else list.sort((a,b)=>a.id-b.id);
+ $('status').textContent=`Showing ${list.length} of 151 Pokémon`;
+ $('grid').innerHTML=list.length?list.map(p=>`<button class="pokemon-card ${p.id===selected?'active':''}" data-id="${p.id}" aria-label="View ${pretty(p.name)}"><div class="card-top"><span>NO. ${String(p.id).padStart(3,'0')}</span><span>↗</span></div><img loading="lazy" src="${artwork(p.id)}" alt="${pretty(p.name)}" onerror="this.style.opacity='.2'"><h3>${p.name}</h3><div class="types">${p.types.map(t=>`<span class="type ${typeClass(t)}">${t}</span>`).join('')}</div></button>`).join(''):'<div class="empty">No Pokémon match that search. Try another name, number, or type.</div>';
+ $('grid').querySelectorAll('[data-id]').forEach(b=>b.addEventListener('click',()=>showDetail(Number(b.dataset.id))));
+}
+function showDetail(id){
+ const p=all.find(x=>x.id===id);if(!p)return;selected=id;
+ $('grid').querySelectorAll('.pokemon-card').forEach(b=>b.classList.toggle('active',Number(b.dataset.id)===id));
+ const family=(evolutions[id]||[id]).map(n=>all.find(x=>x.id===n)).filter(Boolean);
+ const evoHtml=family.map((e,i)=>`${i?'<span class="arrow">→</span>':''}<button class="evo-item" data-evo="${e.id}" aria-label="View ${pretty(e.name)}"><img loading="lazy" src="${artwork(e.id)}" alt=""><div>${e.name}</div></button>`).join('');
+ $('detail').innerHTML=`<div class="detail-hero"><div><div class="detail-number">NATIONAL DEX #${String(p.id).padStart(3,'0')}</div><h2>${p.name}</h2><div class="types" style="justify-content:center">${p.types.map(t=>`<span class="type ${typeClass(t)}">${t}</span>`).join('')}</div></div><img src="${artwork(p.id)}" alt="${pretty(p.name)} artwork"></div><div class="detail-content"><div class="section-title">Pokédex description</div><p>${p.description}</p><div class="facts"><div class="fact"><span>Height</span><strong>${(p.height/10).toFixed(1)} m</strong></div><div class="fact"><span>Weight</span><strong>${(p.weight/10).toFixed(1)} kg</strong></div><div class="fact"><span>Pokédex no.</span><strong>#${String(p.id).padStart(3,'0')}</strong></div><div class="fact"><span>Region</span><strong>Kanto</strong></div></div><div class="section-title">Evolution family</div><div class="evolution">${evoHtml||'No evolution data available.'}</div><p style="font-size:11px;margin-bottom:0">Evolution families can include later-generation evolutions; this page displays only members among the original 151.</p></div>`;
+ $('detail').querySelectorAll('[data-evo]').forEach(b=>b.addEventListener('click',()=>{const target=all.find(x=>x.id===Number(b.dataset.evo));if(target){$('search').value='';$('typeFilter').value='';render();showDetail(target.id)}}));
+}
+$('search').addEventListener('input',render);$('typeFilter').addEventListener('change',render);$('sort').addEventListener('change',render);
+load();
+</script>
+</body>
+</html>
