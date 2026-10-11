@@ -31,7 +31,7 @@ main{max-width:1180px;margin:22px auto;padding:22px;background:#d82233;border:5p
 .scene-flying{background:linear-gradient(180deg,#a8dcff 0%,#e9f7ff 48%,#a2c8e8 49%,#7195c5 100%)}
 .scene-poison{background:linear-gradient(180deg,#d9c1ef 0%,#f2e6ff 48%,#a978c7 49%,#614078 100%)}
 .scene-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-around;font-size:clamp(28px,5vw,55px);opacity:.42;pointer-events:none;letter-spacing:3px;z-index:-1}
-.matchups{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.matchup{background:#fff;border:1px solid #d8e5ce;border-radius:9px;padding:10px;min-width:0}.matchup h4{font-size:11px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.08em;color:#4d6445}.matchup p{font-size:11px;margin:7px 0 0;color:#66715f;line-height:1.45}.matchup .types{gap:4px}.matchup .type{font-size:9px;padding:4px 6px}.type-chip{display:inline-block;padding:4px 6px;margin:2px;border-radius:5px;background:#eef1f6;color:#354056;font-size:9px;font-weight:900;text-transform:uppercase}
+.matchups{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.matchup{background:#fff;border:1px solid #d8e5ce;border-radius:9px;padding:10px;min-width:0}.matchup h4{font-size:11px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.08em;color:#4d6445}.matchup p{font-size:11px;margin:7px 0 0;color:#66715f;line-height:1.45}.matchup .types{gap:4px}.matchup .type{font-size:9px;padding:4px 6px}.form-controls{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 13px}.form-toggle{flex:1;min-width:90px;border:2px solid #aebd9f;border-radius:9px;background:#fff;color:#354056;font:inherit;font-size:12px;font-weight:850;padding:9px 10px;cursor:pointer}.form-toggle.active{background:#d92332;color:#fff;border-color:#8c1421}.mega-list{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}.mega-list .form-toggle{flex:0 1 auto}.form-note{font-size:11px;color:#66715f;margin:0 0 12px}.type-chip{display:inline-block;padding:4px 6px;margin:2px;border-radius:5px;background:#eef1f6;color:#354056;font-size:9px;font-weight:900;text-transform:uppercase}
 @media(max-width:900px){.layout{grid-template-columns:1fr}.detail{position:static;grid-row:1}.detail-hero{display:flex;align-items:center;justify-content:center;gap:18px;text-align:left;padding:10px 18px}.detail-hero img{width:115px;height:105px;margin:0}.detail-hero .detail-number{display:block}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{align-items:start;flex-direction:column;gap:14px}}
 @media(max-width:540px){header{padding:22px 17px}.hero{margin-top:20px}main{margin:12px 8px;padding:14px 10px 25px;border-radius:18px}.toolbar select{flex:1;width:auto}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.pokemon-card{padding:10px}.pokemon-card img{height:95px}.pokemon-card h3{font-size:14px}.detail-hero img{width:95px;height:90px}.detail h2{font-size:22px}}
 </style>
@@ -60,8 +60,23 @@ main{max-width:1180px;margin:22px auto;padding:22px;background:#d82233;border:5p
 const API='https://pokeapi.co/api/v2/';
 const artwork=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 const $=id=>document.getElementById(id);
-let all=[], selected=1, evolutions={}, typeData={};
+let all=[], selected=1, evolutions={}, typeData={}, shinyMode=false, megaMode=0;
 const habitats={grass:'🌲 🌿 🍃 🌳',fire:'🌋 🔥 ☀️ 🌋',water:'🌊 🫧 🐚 🌊',bug:'🌼 🌿 🦋 🌱',normal:'🌾 ☁️ 🌳 🌾',electric:'⚡ 🌩️ ✨ ⚡',ground:'⛰️ 🪨 🏜️ ⛰️',fairy:'🌸 ✨ 🌷 💖',fighting:'🥊 🏟️ 💥 🥊',psychic:'🔮 🌙 ✨ 🔮',rock:'🪨 ⛰️ 🏔️ 🪨',ghost:'🌙 👻 🕯️ 🌫️',ice:'❄️ 🧊 🏔️ ❄️',dragon:'🐉 🌌 ✨ 🐉',steel:'⚙️ 🛠️ 🏭 ⚙️',flying:'☁️ 🪶 🕊️ ☁️',poison:'☠️ 🧪 🟣 ☠️'};
+const megaForms={
+  3:[{name:'Mega Venusaur',id:10033,types:['grass','poison']}],
+  6:[{name:'Mega Charizard X',id:10034,types:['fire','dragon']},{name:'Mega Charizard Y',id:10035,types:['fire','flying']}],
+  9:[{name:'Mega Blastoise',id:10036,types:['water']}],
+  15:[{name:'Mega Beedrill',id:10090,types:['bug','poison']}],
+  18:[{name:'Mega Pidgeot',id:10073,types:['normal','flying']}],
+  65:[{name:'Mega Alakazam',id:10037,types:['psychic']}],
+  80:[{name:'Mega Slowbro',id:10071,types:['water','psychic']}],
+  94:[{name:'Mega Gengar',id:10038,types:['ghost','poison']}],
+  115:[{name:'Mega Kangaskhan',id:10039,types:['normal']}],
+  127:[{name:'Mega Pinsir',id:10040,types:['bug','flying']}],
+  130:[{name:'Mega Gyarados',id:10041,types:['water','dark']}],
+  142:[{name:'Mega Aerodactyl',id:10042,types:['rock','flying']}],
+  150:[{name:'Mega Mewtwo X',id:10043,types:['psychic','fighting']},{name:'Mega Mewtwo Y',id:10044,types:['psychic']}]
+};
 const typeNames=['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
 const pretty=s=>s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 const typeClass=s=>s.toLowerCase();
@@ -107,14 +122,27 @@ function getMatchups(p){
  return {weaknesses,resists,immune,strong:[...strong],less:[...resisted],no:[...immuneTo]};
 }
 function chips(types){return types.length?types.map(t=>`<span class="type-chip">${pretty(t)}</span>`).join(''):'<span style="font-size:11px;color:#77816e">None</span>'}
-function showDetail(id){
- const p=all.find(x=>x.id===id);if(!p)return;selected=id;
+function showDetail(id,preserveForm=false){
+ const p=all.find(x=>x.id===id);if(!p)return;selected=id;if(!preserveForm){shinyMode=false;megaMode=0;}
  $('grid').querySelectorAll('.pokemon-card').forEach(b=>b.classList.toggle('active',Number(b.dataset.id)===id));
  const family=(evolutions[id]||[id]).map(n=>all.find(x=>x.id===n)).filter(Boolean);
  const evoHtml=family.map((e,i)=>`${i?'<span class="arrow">→</span>':''}<button class="evo-item" data-evo="${e.id}" aria-label="View ${pretty(e.name)}"><img loading="lazy" src="${artwork(e.id)}" alt=""><div>${e.name}</div></button>`).join('');
  const scene=habitatFor(p), matchup=getMatchups(p);
- $('detail').innerHTML=`<div class="detail-hero scene-${scene}" data-scene="${(habitats[scene]||habitats.normal).replace(/"/g,'&quot;')}"><div><div class="detail-number">NATIONAL DEX #${String(p.id).padStart(3,'0')}</div><h2>${p.name}</h2><div class="types" style="justify-content:center">${p.types.map(t=>`<span class="type ${typeClass(t)}">${t}</span>`).join('')}</div></div><img src="${artwork(p.id)}" alt="${pretty(p.name)} artwork"></div><div class="detail-content"><div class="section-title">Pokédex description</div><p>${p.description}</p><div class="facts"><div class="fact"><span>Height</span><strong>${(p.height/10).toFixed(1)} m</strong></div><div class="fact"><span>Weight</span><strong>${(p.weight/10).toFixed(1)} kg</strong></div><div class="fact"><span>Pokédex no.</span><strong>#${String(p.id).padStart(3,'0')}</strong></div><div class="fact"><span>Region</span><strong>Kanto</strong></div></div><div class="section-title">Battle matchups</div><div class="matchups"><div class="matchup"><h4>Weak to</h4><div>${chips(matchup.weaknesses)}</div><p>Deals extra damage to this Pokémon.</p></div><div class="matchup"><h4>Resists</h4><div>${chips(matchup.resists)}</div><p>These attacks deal reduced damage.</p></div><div class="matchup"><h4>Immune to</h4><div>${chips(matchup.immune)}</div><p>These types deal no damage.</p></div><div class="matchup"><h4>Strong against</h4><div>${chips(matchup.strong)}</div><p>Its own types are super effective against these.</p></div></div><div class="section-title">Evolution family</div><div class="evolution">${evoHtml||'No evolution data available.'}</div><p style="font-size:11px;margin-bottom:0">Evolution families can include later-generation evolutions; this page displays only members among the original 151.</p></div>`;
+ const mega=megaForms[id]||[];
+ const megaOptions=mega.map((m,i)=>`<button class="form-toggle ${megaMode===i+1?'active':''}" data-mega="${i+1}">${m.name}</button>`).join('');
+ const shownForm=megaMode?mega[megaMode-1]:null;
+ const shownId=shownForm?shownForm.id:p.id;
+ const shownName=shownForm?shownForm.name:pretty(p.name);
+ const shownTypes=shownForm?shownForm.types:p.types;
+ const shownMatchup=getMatchups({...p,types:shownTypes});
+ const shinyArtwork=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
+ const shownArtwork=shinyMode?shinyArtwork(shownId):artwork(shownId);
+ $('detail').innerHTML=`<div class="detail-hero scene-${scene}" data-scene="${(habitats[scene]||habitats.normal).replace(/"/g,'&quot;')}"><div><div class="detail-number">NATIONAL DEX #${String(p.id).padStart(3,'0')}</div><h2>${shownName}</h2><div class="types" style="justify-content:center">${shownTypes.map(t=>`<span class="type ${typeClass(t)}">${t}</span>`).join('')}</div></div><img id="mainArtwork" src="${shownArtwork}" alt="${shownName} ${shinyMode?'shiny ':''}artwork" onerror="this.onerror=null;this.src='${artwork(p.id)}'"></div><div class="detail-content"><div class="section-title">Appearance</div><div class="form-controls"><button class="form-toggle ${!shinyMode?'active':''}" id="regularToggle">Regular</button><button class="form-toggle ${shinyMode?'active':''}" id="shinyToggle">✨ Shiny</button></div>${mega.length?`<div class="section-title">Mega Evolution</div><div class="mega-list"><button class="form-toggle ${megaMode===0?'active':''}" data-mega="0">Base form</button>${megaOptions}</div><p class="form-note">All Mega Evolution forms available for this Pokémon are listed here. Switch between regular and shiny artwork above. Type badges and battle matchups update for each Mega form.</p>`:''}<div class="section-title">Pokédex description</div><p>${p.description}</p><div class="facts"><div class="fact"><span>Height</span><strong>${(p.height/10).toFixed(1)} m</strong></div><div class="fact"><span>Weight</span><strong>${(p.weight/10).toFixed(1)} kg</strong></div><div class="fact"><span>Pokédex no.</span><strong>#${String(p.id).padStart(3,'0')}</strong></div><div class="fact"><span>Region</span><strong>Kanto</strong></div></div><div class="section-title">Battle matchups</div><div class="matchups"><div class="matchup"><h4>Weak to</h4><div>${chips(shownMatchup.weaknesses)}</div><p>Deals extra damage to this Pokémon.</p></div><div class="matchup"><h4>Resists</h4><div>${chips(shownMatchup.resists)}</div><p>These attacks deal reduced damage.</p></div><div class="matchup"><h4>Immune to</h4><div>${chips(shownMatchup.immune)}</div><p>These types deal no damage.</p></div><div class="matchup"><h4>Strong against</h4><div>${chips(shownMatchup.strong)}</div><p>Its own types are super effective against these.</p></div></div><div class="section-title">Evolution family</div><div class="evolution">${evoHtml||'No evolution data available.'}</div><p style="font-size:11px;margin-bottom:0">Evolution families can include later-generation evolutions; this page displays only members among the original 151.</p></div>`;
  $('detail').querySelectorAll('[data-evo]').forEach(b=>b.addEventListener('click',()=>{const target=all.find(x=>x.id===Number(b.dataset.evo));if(target){$('search').value='';$('typeFilter').value='';render();showDetail(target.id)}}));
+ $('regularToggle').addEventListener('click',()=>{shinyMode=false;showDetail(id,true);$('detail').scrollIntoView({behavior:'smooth',block:'start'})});
+ $('shinyToggle').addEventListener('click',()=>{shinyMode=true;showDetail(id,true);$('detail').scrollIntoView({behavior:'smooth',block:'start'})});
+ $('detail').querySelectorAll('[data-mega]').forEach(b=>b.addEventListener('click',()=>{megaMode=Number(b.dataset.mega);const keepShiny=shinyMode;showDetail(id,true);shinyMode=keepShiny;const formId=megaMode?(megaForms[id]||[])[megaMode-1].id:id;const img=$('mainArtwork');img.src=shinyMode?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${formId}.png`:artwork(formId);img.alt=`${megaMode?(megaForms[id]||[])[megaMode-1].name:pretty(p.name)} ${shinyMode?'shiny ':''}artwork`; $('regularToggle').classList.toggle('active',!shinyMode);$('shinyToggle').classList.toggle('active',shinyMode);$('detail').querySelectorAll('[data-mega]').forEach(x=>x.classList.toggle('active',Number(x.dataset.mega)===megaMode));$('detail').querySelector('.detail-hero h2').textContent=megaMode?(megaForms[id]||[])[megaMode-1].name:pretty(p.name)}));
+ $('detail').scrollIntoView({behavior:'smooth',block:'start'});
 }
 $('search').addEventListener('input',render);$('typeFilter').addEventListener('change',render);$('sort').addEventListener('change',render);
 load();
