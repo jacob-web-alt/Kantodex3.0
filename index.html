@@ -40,13 +40,26 @@ main{max-width:1180px;margin:22px auto;padding:22px;background:#d82233;border:5p
 <header>
   <div class="topline"><span class="pokeball"></span> KantoDex</div>
   <div class="hero">
-    <div><div class="eyebrow">Generation I · National Pokédex</div><h1>The original 151.</h1><p>Your pocket-sized field guide to Kanto. Explore habitat-inspired scenes, discover battle matchups, and follow each Pokémon’s evolution family.</p></div>
+    <div><div class="eyebrow" id="regionEyebrow">Multiple generations · National Pokédex</div><h1 id="pageTitle">Explore every region.</h1><p id="pageIntro">Travel across the Pokémon world. Choose a region to explore its Pokémon, habitats, battle matchups, and evolution families.</p></div>
     <div class="count" id="count">Loading Pokédex…</div>
   </div>
 </header>
 <main>
   <div class="toolbar">
     <div class="search"><span>⌕</span><input id="search" type="search" placeholder="Search by name or Pokédex number…" aria-label="Search Pokémon"></div>
+    <select id="regionFilter" aria-label="Choose Pokémon region">
+      <option value="kanto">Kanto · 1–151</option>
+      <option value="johto">Johto · 152–251</option>
+      <option value="hoenn">Hoenn · 252–386</option>
+      <option value="sinnoh">Sinnoh · 387–493</option>
+      <option value="unova">Unova · 494–649</option>
+      <option value="kalos">Kalos · 650–721</option>
+      <option value="alola">Alola · 722–809</option>
+      <option value="galar">Galar · 810–898</option>
+      <option value="hisui">Hisui · 899–905</option>
+      <option value="paldea">Paldea · 906–1025</option>
+      <option value="all">All regions · 1–1025</option>
+    </select>
     <select id="typeFilter" aria-label="Filter by type"><option value="">All types</option></select>
     <select id="sort" aria-label="Sort Pokémon"><option value="number">Pokédex order</option><option value="name">Name A–Z</option></select>
   </div>
@@ -60,7 +73,20 @@ main{max-width:1180px;margin:22px auto;padding:22px;background:#d82233;border:5p
 const API='https://pokeapi.co/api/v2/';
 const artwork=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 const $=id=>document.getElementById(id);
-let all=[], selected=1, evolutions={}, typeData={}, shinyMode=false, megaMode=0;
+let all=[], selected=1, evolutions={}, typeData={}, shinyMode=false, megaMode=0, currentRegion='kanto';
+const regions={
+ kanto:{name:'Kanto',start:1,end:151,generation:'Generation I'},
+ johto:{name:'Johto',start:152,end:251,generation:'Generation II'},
+ hoenn:{name:'Hoenn',start:252,end:386,generation:'Generation III'},
+ sinnoh:{name:'Sinnoh',start:387,end:493,generation:'Generation IV'},
+ unova:{name:'Unova',start:494,end:649,generation:'Generation V'},
+ kalos:{name:'Kalos',start:650,end:721,generation:'Generation VI'},
+ alola:{name:'Alola',start:722,end:809,generation:'Generation VII'},
+ galar:{name:'Galar',start:810,end:898,generation:'Generation VIII'},
+ hisui:{name:'Hisui',start:899,end:905,generation:'Generation VIII'},
+ paldea:{name:'Paldea',start:906,end:1025,generation:'Generation IX'}
+};
+function regionForId(id){return Object.values(regions).find(r=>id>=r.start&&id<=r.end)?.name||'Unknown'}
 const habitats={grass:'🌲 🌿 🍃 🌳',fire:'🌋 🔥 ☀️ 🌋',water:'🌊 🫧 🐚 🌊',bug:'🌼 🌿 🦋 🌱',normal:'🌾 ☁️ 🌳 🌾',electric:'⚡ 🌩️ ✨ ⚡',ground:'⛰️ 🪨 🏜️ ⛰️',fairy:'🌸 ✨ 🌷 💖',fighting:'🥊 🏟️ 💥 🥊',psychic:'🔮 🌙 ✨ 🔮',rock:'🪨 ⛰️ 🏔️ 🪨',ghost:'🌙 👻 🕯️ 🌫️',ice:'❄️ 🧊 🏔️ ❄️',dragon:'🐉 🌌 ✨ 🐉',steel:'⚙️ 🛠️ 🏭 ⚙️',flying:'☁️ 🪶 🕊️ ☁️',poison:'☠️ 🧪 🟣 ☠️'};
 const megaForms={
   3:[{name:'Mega Venusaur',id:10033,types:['grass','poison']}],
@@ -82,32 +108,52 @@ const pretty=s=>s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 const typeClass=s=>s.toLowerCase();
 async function getJSON(url){const r=await fetch(url);if(!r.ok)throw new Error('Could not load PokéAPI data');return r.json()}
 async function pool(items,limit,fn){let i=0;const workers=Array.from({length:Math.min(limit,items.length)},async()=>{while(i<items.length){const n=i++;await fn(items[n],n)}});await Promise.all(workers)}
-function pickDescription(species){const entries=species.flavor_text_entries||[];const en=entries.find(x=>x.language.name==='en'&&['red','blue','yellow','firered','leafgreen'].includes(x.version.name))||entries.find(x=>x.language.name==='en');return (en?.flavor_text||`${pretty(species.name)} is one of the original Pokémon discovered in the Kanto region.`).replace(/[\n\f\r]/g,' ').replace(/\s+/g,' ')}
+function pickDescription(species){const entries=species.flavor_text_entries||[];const en=entries.find(x=>x.language.name==='en') ;return (en?.flavor_text||`${pretty(species.name)} is listed in the National Pokédex.`).replace(/[\\n\\f\\r]/g,' ').replace(/\\s+/g,' ')}
 async function load(){
  try{
-  const list=await getJSON(API+'pokemon?limit=151&offset=0');
   await pool(typeNames,8,async t=>{try{typeData[t]=(await getJSON(API+'type/'+t+'/')).damage_relations}catch(e){}});
-  all=Array.from({length:151},(_,i)=>({id:i+1,name:list.results[i].name,types:[],height:0,weight:0,description:'',speciesUrl:API+`pokemon-species/${i+1}/`,chainId:null}));
+  await loadRegion('kanto');
+ }catch(e){$('status').textContent='Pokédex data could not load. Check your internet connection and refresh the page.';$('grid').innerHTML='<div class="empty">Could not connect to PokéAPI. Please check your connection and refresh.</div>'}
+}
+async function loadRegion(key){
+ currentRegion=key;
+ const isAll=key==='all';
+ const reg=regions[key];
+ const start=isAll?1:reg.start,end=isAll?1025:reg.end;
+ $('regionFilter').value=key;
+ $('grid').innerHTML='<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+ $('status').textContent=`Loading ${isAll?'all regions':reg.name} Pokémon…`;
+ $('pageTitle').textContent=isAll?'Explore every region.':`Discover ${reg.name}.`;
+ $('regionEyebrow').textContent=isAll?'Generations I–IX · National Pokédex':`${reg.generation} · National Pokédex`;
+ $('pageIntro').textContent=isAll?'Explore Pokémon from Kanto through Paldea, with habitats, battle matchups, forms, and evolution families.':`Explore ${reg.name} Pokémon, their habitats, battle matchups, and evolution families.`;
+ $('typeFilter').innerHTML='<option value="">All types</option>';
+ $('search').value='';
+ try{
+  const list=await getJSON(API+`pokemon?limit=${end-start+1}&offset=${start-1}`);
+  all=Array.from({length:end-start+1},(_,i)=>({id:start+i,name:list.results[i]?.name||`pokemon-${start+i}`,types:[],height:0,weight:0,description:'',speciesUrl:API+`pokemon-species/${start+i}/`,chainId:null}));
+  evolutions={};selected=start;shinyMode=false;megaMode=0;
   let done=0;
-  await pool(all,10,async p=>{
+  await pool(all,12,async p=>{
    try{
     const d=await getJSON(API+`pokemon/${p.id}/`);
-    p.types=d.types.map(t=>t.type.name);p.height=d.height;p.weight=d.weight;
+    p.name=d.name;p.types=d.types.map(t=>t.type.name);p.height=d.height;p.weight=d.weight;
     const s=await getJSON(p.speciesUrl);p.description=pickDescription(s);p.chainId=s.evolution_chain.url;
-   }catch(e){p.description=`${pretty(p.name)} is Pokémon #${p.id} in the original Kanto Pokédex.`}
-   done++;if(done%15===0){$('status').textContent=`Loading Pokémon details… ${done} of 151`}
+   }catch(e){p.description=`${pretty(p.name)} is Pokémon #${p.id} in the National Pokédex.`}
+   done++;if(done%20===0){$('status').textContent=`Loading ${isAll?'all regions':reg.name} details… ${done} of ${all.length}`}
   });
   const chainUrls=[...new Set(all.map(p=>p.chainId).filter(Boolean))];
-  await pool(chainUrls,8,async url=>{try{const data=await getJSON(url);const family=[];function walk(node){const id=Number(node.species.url.match(/pokemon-species\/(\d+)/)[1]);if(id<=151)family.push(id);node.evolves_to.forEach(walk)}walk(data.chain);family.sort((a,b)=>a-b);family.forEach(id=>evolutions[id]=family)}catch(e){}});
+  await pool(chainUrls,10,async url=>{try{const data=await getJSON(url);const family=[];function walk(node){const id=Number(node.species.url.match(/pokemon-species\/(\d+)/)[1]);if(id>=start&&id<=end)family.push(id);node.evolves_to.forEach(walk)}walk(data.chain);family.sort((a,b)=>a-b);family.forEach(id=>evolutions[id]=family)}catch(e){}});
   const types=[...new Set(all.flatMap(p=>p.types))].sort();types.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=pretty(t);$('typeFilter').append(o)});
-  $('count').textContent='151 Pokémon · 1 region';$('status').textContent='151 Pokémon ready to explore';render();showDetail(1);
- }catch(e){$('status').textContent='Pokédex data could not load. Check your internet connection and refresh the page.';$('grid').innerHTML='<div class="empty">Could not connect to PokéAPI. Please check your connection and refresh.</div>'}
+  $('count').textContent=isAll?`${all.length} Pokémon · 10 regions`:`${all.length} Pokémon · ${reg.name}`;
+  $('status').textContent=`${all.length} Pokémon ready to explore in ${isAll?'all regions':reg.name}`;
+  render();showDetail(start);
+ }catch(e){$('status').textContent='Could not load this region. Check your connection and try again.';$('grid').innerHTML='<div class="empty">Could not load Pokémon data. Please refresh and try again.</div>'}
 }
 function render(){
  const q=$('search').value.trim().toLowerCase(),type=$('typeFilter').value,sort=$('sort').value;
  let list=all.filter(p=>(p.name.includes(q)||String(p.id)===q||String(p.id).padStart(3,'0')===q)&&(!type||p.types.includes(type)));
  if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));else list.sort((a,b)=>a.id-b.id);
- $('status').textContent=`Showing ${list.length} of 151 Pokémon`;
+ $('status').textContent=`Showing ${list.length} of ${all.length} Pokémon · ${currentRegion==='all'?'all regions':regions[currentRegion].name}`;
  $('grid').innerHTML=list.length?list.map(p=>`<button class="pokemon-card scene-${p.types[0]||'normal'} ${p.id===selected?'active':''}" data-id="${p.id}" aria-label="View ${pretty(p.name)}"><div class="card-top"><span>NO. ${String(p.id).padStart(3,'0')}</span><span>↗</span></div><img loading="lazy" src="${artwork(p.id)}" alt="${pretty(p.name)}" onerror="this.style.opacity='.2'"><h3>${p.name}</h3><div class="types">${p.types.map(t=>`<span class="type ${typeClass(t)}">${t}</span>`).join('')}</div></button>`).join(''):'<div class="empty">No Pokémon match that search. Try another name, number, or type.</div>';
  $('grid').querySelectorAll('[data-id]').forEach(b=>b.addEventListener('click',()=>showDetail(Number(b.dataset.id))));
 }
@@ -137,7 +183,7 @@ function showDetail(id,preserveForm=false){
  const shownMatchup=getMatchups({...p,types:shownTypes});
  const shinyArtwork=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
  const shownArtwork=shinyMode?shinyArtwork(shownId):artwork(shownId);
- $('detail').innerHTML=`<div class="detail-hero scene-${scene}" data-scene="${(habitats[scene]||habitats.normal).replace(/"/g,'&quot;')}"><div><div class="detail-number">NATIONAL DEX #${String(p.id).padStart(3,'0')}</div><h2>${shownName}</h2><div class="types" style="justify-content:center">${shownTypes.map(t=>`<span class="type ${typeClass(t)}">${t}</span>`).join('')}</div></div><img id="mainArtwork" src="${shownArtwork}" alt="${shownName} ${shinyMode?'shiny ':''}artwork" onerror="this.onerror=null;this.src='${artwork(p.id)}'"></div><div class="detail-content"><div class="section-title">Appearance</div><div class="form-controls"><button class="form-toggle ${!shinyMode?'active':''}" id="regularToggle">Regular</button><button class="form-toggle ${shinyMode?'active':''}" id="shinyToggle">✨ Shiny</button></div>${mega.length?`<div class="section-title">Mega Evolution</div><div class="mega-list"><button class="form-toggle ${megaMode===0?'active':''}" data-mega="0">Base form</button>${megaOptions}</div><p class="form-note">All Mega Evolution forms available for this Pokémon are listed here. Switch between regular and shiny artwork above. Type badges and battle matchups update for each Mega form.</p>`:''}<div class="section-title">Pokédex description</div><p>${p.description}</p><div class="facts"><div class="fact"><span>Height</span><strong>${(p.height/10).toFixed(1)} m</strong></div><div class="fact"><span>Weight</span><strong>${(p.weight/10).toFixed(1)} kg</strong></div><div class="fact"><span>Pokédex no.</span><strong>#${String(p.id).padStart(3,'0')}</strong></div><div class="fact"><span>Region</span><strong>Kanto</strong></div></div><div class="section-title">Battle matchups</div><div class="matchups"><div class="matchup"><h4>Weak to</h4><div>${chips(shownMatchup.weaknesses)}</div><p>Deals extra damage to this Pokémon.</p></div><div class="matchup"><h4>Resists</h4><div>${chips(shownMatchup.resists)}</div><p>These attacks deal reduced damage.</p></div><div class="matchup"><h4>Immune to</h4><div>${chips(shownMatchup.immune)}</div><p>These types deal no damage.</p></div><div class="matchup"><h4>Strong against</h4><div>${chips(shownMatchup.strong)}</div><p>Its own types are super effective against these.</p></div></div><div class="section-title">Evolution family</div><div class="evolution">${evoHtml||'No evolution data available.'}</div><p style="font-size:11px;margin-bottom:0">Evolution families can include later-generation evolutions; this page displays only members among the original 151.</p></div>`;
+ $('detail').innerHTML=`<div class="detail-hero scene-${scene}" data-scene="${(habitats[scene]||habitats.normal).replace(/"/g,'&quot;')}"><div><div class="detail-number">NATIONAL DEX #${String(p.id).padStart(3,'0')}</div><h2>${shownName}</h2><div class="types" style="justify-content:center">${shownTypes.map(t=>`<span class="type ${typeClass(t)}">${t}</span>`).join('')}</div></div><img id="mainArtwork" src="${shownArtwork}" alt="${shownName} ${shinyMode?'shiny ':''}artwork" onerror="this.onerror=null;this.src='${artwork(p.id)}'"></div><div class="detail-content"><div class="section-title">Appearance</div><div class="form-controls"><button class="form-toggle ${!shinyMode?'active':''}" id="regularToggle">Regular</button><button class="form-toggle ${shinyMode?'active':''}" id="shinyToggle">✨ Shiny</button></div>${mega.length?`<div class="section-title">Mega Evolution</div><div class="mega-list"><button class="form-toggle ${megaMode===0?'active':''}" data-mega="0">Base form</button>${megaOptions}</div><p class="form-note">All Mega Evolution forms available for this Pokémon are listed here. Switch between regular and shiny artwork above. Type badges and battle matchups update for each Mega form.</p>`:''}<div class="section-title">Pokédex description</div><p>${p.description}</p><div class="facts"><div class="fact"><span>Height</span><strong>${(p.height/10).toFixed(1)} m</strong></div><div class="fact"><span>Weight</span><strong>${(p.weight/10).toFixed(1)} kg</strong></div><div class="fact"><span>Pokédex no.</span><strong>#${String(p.id).padStart(3,'0')}</strong></div><div class="fact"><span>Region</span><strong>${regionForId(p.id)}</strong></div></div><div class="section-title">Battle matchups</div><div class="matchups"><div class="matchup"><h4>Weak to</h4><div>${chips(shownMatchup.weaknesses)}</div><p>Deals extra damage to this Pokémon.</p></div><div class="matchup"><h4>Resists</h4><div>${chips(shownMatchup.resists)}</div><p>These attacks deal reduced damage.</p></div><div class="matchup"><h4>Immune to</h4><div>${chips(shownMatchup.immune)}</div><p>These types deal no damage.</p></div><div class="matchup"><h4>Strong against</h4><div>${chips(shownMatchup.strong)}</div><p>Its own types are super effective against these.</p></div></div><div class="section-title">Evolution family</div><div class="evolution">${evoHtml||'No evolution data available.'}</div><p style="font-size:11px;margin-bottom:0">Evolution families are filtered to the currently selected region.</p></div>`;
  $('detail').querySelectorAll('[data-evo]').forEach(b=>b.addEventListener('click',()=>{const target=all.find(x=>x.id===Number(b.dataset.evo));if(target){$('search').value='';$('typeFilter').value='';render();showDetail(target.id)}}));
  $('regularToggle').addEventListener('click',()=>{shinyMode=false;showDetail(id,true);$('detail').scrollIntoView({behavior:'smooth',block:'start'})});
  $('shinyToggle').addEventListener('click',()=>{shinyMode=true;showDetail(id,true);$('detail').scrollIntoView({behavior:'smooth',block:'start'})});
@@ -145,6 +191,7 @@ function showDetail(id,preserveForm=false){
  $('detail').scrollIntoView({behavior:'smooth',block:'start'});
 }
 $('search').addEventListener('input',render);$('typeFilter').addEventListener('change',render);$('sort').addEventListener('change',render);
+$('regionFilter').addEventListener('change',e=>loadRegion(e.target.value));
 load();
 </script>
 </body>
